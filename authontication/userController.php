@@ -2,11 +2,13 @@
     //connection with database
     $conn = new mysqli("localhost","root","" ,"crad");
 
+    //event in submit button
     if(isset($_POST['submit'])){
 
         $email = inputvalidation($_POST['email']);
         $password = inputvalidation($_POST['password']);
 
+        //create table in database
         $conn->query("
             create table user(
                 id int auto_increment primary key,
@@ -15,22 +17,26 @@
             )
         ");
 
-        if(strlen($password)>10 && filter_var($email , FILTER_VALIDATE_EMAIL)){
+        //check if account regstration or not
+        $selected = $conn->query("
+            SELECT id, email, password FROM user WHERE email= '{$email}'
+        ");
+        $data = $selected->fetch_all(MYSQLI_ASSOC);
+    
+        //store account in database
+        if(strlen($password)>10 && filter_var($email , FILTER_VALIDATE_EMAIL) && $data){
             $conn->query("
             insert into user set
             email='{$email}',
             password='{$password}'
             ");
         }else{
-            echo 'please write at the least 10 character'.'<br';
-            echo strlen($password);
             header('location:login.php');
         };
 
-
-
     };
 
+    //validation
     function inputvalidation($input){
         $data = trim($input);
         $datastrip = stripcslashes($data);
